@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 
@@ -241,7 +240,7 @@ const ChartContainer = React.forwardRef<
       >
         <ChartStyle id={chartId} config={props.config} />
         <RechartsPrimitive.ResponsiveContainer>
-          {children}
+          {React.isValidElement(children) ? children : <>{children}</>}
         </RechartsPrimitive.ResponsiveContainer>
       </div>
     </ChartContext.Provider>
