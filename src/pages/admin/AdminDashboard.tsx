@@ -1,11 +1,9 @@
-
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Calendar, Users, CalendarCheck, Loader } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useEvents, Event, Booking } from "@/contexts/EventContext";
-import { Bar } from "recharts";
+import { useEvents } from "@/contexts/EventContext";
 import { Chart } from "@/components/ui/chart";
 
 const AdminDashboard: React.FC = () => {
@@ -164,15 +162,16 @@ const AdminDashboard: React.FC = () => {
             </CardHeader>
             <CardContent>
               {topEvents.length > 0 ? (
-                <Chart
-                  type="bar"
-                  data={topEvents}
-                  index="name"
-                  categories={["bookings"]}
-                  colors={["#6A3DE8"]}
-                  valueFormatter={(value) => `${value} bookings`}
-                  className="h-64"
-                />
+                <div className="h-64">
+                  <Chart
+                    type="bar"
+                    data={topEvents}
+                    index="name"
+                    categories={["bookings"]}
+                    colors={["#6A3DE8"]}
+                    valueFormatter={(value) => `${value} bookings`}
+                  />
+                </div>
               ) : (
                 <div className="flex items-center justify-center h-64 text-gray-500">
                   No bookings data available
@@ -189,15 +188,16 @@ const AdminDashboard: React.FC = () => {
             </CardHeader>
             <CardContent>
               {categoryChartData.length > 0 ? (
-                <Chart
-                  type="pie"
-                  data={categoryChartData}
-                  index="name"
-                  categories={["value"]}
-                  colors={["#6A3DE8", "#9A7AF3", "#B9A7F8", "#D5CCFB", "#E9E4FD"]}
-                  valueFormatter={(value) => `${value} bookings`}
-                  className="h-64"
-                />
+                <div className="h-64">
+                  <Chart
+                    type="pie"
+                    data={categoryChartData}
+                    index="name"
+                    categories={["value"]}
+                    colors={["#6A3DE8", "#9A7AF3", "#B9A7F8", "#D5CCFB", "#E9E4FD"]}
+                    valueFormatter={(value) => `${value} bookings`}
+                  />
+                </div>
               ) : (
                 <div className="flex items-center justify-center h-64 text-gray-500">
                   No category data available
