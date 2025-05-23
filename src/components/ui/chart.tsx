@@ -33,7 +33,6 @@ function useChart() {
   return context
 }
 
-// Export the Chart component that was missing
 export const Chart = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> & {
@@ -137,11 +136,13 @@ export const Chart = React.forwardRef<
               <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
             )}
             {showLegend && (
-              // Fix 1: Use double casting to avoid type error
               <RechartsPrimitive.Legend
                 verticalAlign="top"
                 height={36}
-                content={(props) => <ChartLegendContent {...(props as unknown as ChartLegendContentProps)} />}
+                content={props => {
+                  // @ts-ignore - Ignoring type issues for Legend content prop
+                  return <ChartLegendContent {...props} />
+                }}
               />
             )}
             {categories.map((category, index) => (
@@ -199,11 +200,13 @@ export const Chart = React.forwardRef<
               />
             )}
             {showLegend && (
-              // Fix 2: Use double casting to avoid type error
               <RechartsPrimitive.Legend
                 verticalAlign="top"
                 height={36}
-                content={(props) => <ChartLegendContent {...(props as unknown as ChartLegendContentProps)} />}
+                content={props => {
+                  // @ts-ignore - Ignoring type issues for Legend content prop
+                  return <ChartLegendContent {...props} />
+                }}
               />
             )}
           </RechartsPrimitive.PieChart>
@@ -215,7 +218,6 @@ export const Chart = React.forwardRef<
 
 Chart.displayName = "Chart"
 
-// Update the ChartContainer to properly handle children
 const ChartContainer = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> & {
@@ -238,9 +240,8 @@ const ChartContainer = React.forwardRef<
         {...props}
       >
         <ChartStyle id={chartId} config={props.config} />
-        {/* Fix 3: Wrap non-ReactElement children with a fragment */}
         <RechartsPrimitive.ResponsiveContainer>
-          {React.isValidElement(children) ? children : <>{children}</>}
+          {children}
         </RechartsPrimitive.ResponsiveContainer>
       </div>
     </ChartContext.Provider>
@@ -283,14 +284,14 @@ ${colorConfig
 
 const ChartTooltip = RechartsPrimitive.Tooltip
 
-// Update ChartLegendContentProps to remove HTML attributes that conflict
+// Simplified interfaces to avoid type conflicts
 interface ChartLegendContentProps {
   payload?: Array<{
     value: string;
     type?: string;
     id?: string;
     color?: string;
-    dataKey?: string | number | ((obj: any) => any);
+    dataKey?: any; // Use 'any' to avoid type conflicts
     name?: string;
     payload?: any;
   }>;
@@ -302,7 +303,7 @@ interface ChartLegendContentProps {
 
 const ChartLegendContent = React.forwardRef<
   HTMLDivElement,
-  ChartLegendContentProps & React.HTMLAttributes<HTMLDivElement>
+  ChartLegendContentProps & Omit<React.HTMLAttributes<HTMLDivElement>, "content">
 >(
   (
     {
@@ -362,14 +363,13 @@ const ChartLegendContent = React.forwardRef<
 )
 ChartLegendContent.displayName = "ChartLegendContent"
 
-// Update ChartTooltipContentProps to remove HTML attributes that conflict
 interface ChartTooltipContentProps {
   active?: boolean;
   payload?: Array<{
     name?: string;
     value?: any;
     payload?: any;
-    dataKey?: string | number | ((obj: any) => any);
+    dataKey?: any; // Use 'any' to avoid type conflicts
     color?: string;
   }>;
   label?: React.ReactNode;
@@ -387,7 +387,7 @@ interface ChartTooltipContentProps {
 
 const ChartTooltipContent = React.forwardRef<
   HTMLDivElement,
-  ChartTooltipContentProps & React.HTMLAttributes<HTMLDivElement>
+  ChartTooltipContentProps & Omit<React.HTMLAttributes<HTMLDivElement>, "content" | "label">
 >(
   (
     {
