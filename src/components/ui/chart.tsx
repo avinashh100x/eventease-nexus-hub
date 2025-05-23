@@ -137,11 +137,11 @@ export const Chart = React.forwardRef<
               <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
             )}
             {showLegend && (
-              // Fix 1: Use type assertion to match the expected type
+              // Fix 1: Use double casting to avoid type error
               <RechartsPrimitive.Legend
                 verticalAlign="top"
                 height={36}
-                content={(props) => <ChartLegendContent {...props as ChartLegendContentProps} />}
+                content={(props) => <ChartLegendContent {...(props as unknown as ChartLegendContentProps)} />}
               />
             )}
             {categories.map((category, index) => (
@@ -199,11 +199,11 @@ export const Chart = React.forwardRef<
               />
             )}
             {showLegend && (
-              // Fix 2: Use type assertion to match the expected type
+              // Fix 2: Use double casting to avoid type error
               <RechartsPrimitive.Legend
                 verticalAlign="top"
                 height={36}
-                content={(props) => <ChartLegendContent {...props as ChartLegendContentProps} />}
+                content={(props) => <ChartLegendContent {...(props as unknown as ChartLegendContentProps)} />}
               />
             )}
           </RechartsPrimitive.PieChart>
@@ -215,7 +215,7 @@ export const Chart = React.forwardRef<
 
 Chart.displayName = "Chart"
 
-// Fix 3: Update the type definition to accept ReactNode instead of requiring ReactElement
+// Update the ChartContainer to properly handle children
 const ChartContainer = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> & {
@@ -238,8 +238,9 @@ const ChartContainer = React.forwardRef<
         {...props}
       >
         <ChartStyle id={chartId} config={props.config} />
+        {/* Fix 3: Wrap non-ReactElement children with a fragment */}
         <RechartsPrimitive.ResponsiveContainer>
-          {children}
+          {React.isValidElement(children) ? children : <>{children}</>}
         </RechartsPrimitive.ResponsiveContainer>
       </div>
     </ChartContext.Provider>
@@ -282,25 +283,26 @@ ${colorConfig
 
 const ChartTooltip = RechartsPrimitive.Tooltip
 
-// Fix for Error #1 and #2: Create a custom interface for the ChartLegendContent that accepts the correct types
-type ChartLegendContentProps = {
+// Update ChartLegendContentProps to remove HTML attributes that conflict
+interface ChartLegendContentProps {
   payload?: Array<{
     value: string;
     type?: string;
     id?: string;
     color?: string;
-    dataKey?: string | number | ((obj: any) => any); // Updated to accept function
+    dataKey?: string | number | ((obj: any) => any);
     name?: string;
     payload?: any;
   }>;
   verticalAlign?: 'top' | 'middle' | 'bottom';
   hideIcon?: boolean;
   nameKey?: string;
-} & Omit<React.HTMLAttributes<HTMLDivElement>, 'content'>;
+  className?: string;
+}
 
 const ChartLegendContent = React.forwardRef<
   HTMLDivElement,
-  ChartLegendContentProps
+  ChartLegendContentProps & React.HTMLAttributes<HTMLDivElement>
 >(
   (
     {
@@ -360,31 +362,32 @@ const ChartLegendContent = React.forwardRef<
 )
 ChartLegendContent.displayName = "ChartLegendContent"
 
-// Fix for Error #2 and #3: Create a custom interface for the ChartTooltipContent that accepts the correct types
-type ChartTooltipContentProps = {
+// Update ChartTooltipContentProps to remove HTML attributes that conflict
+interface ChartTooltipContentProps {
   active?: boolean;
   payload?: Array<{
     name?: string;
     value?: any;
     payload?: any;
-    dataKey?: string | number | ((obj: any) => any); // Updated to accept function
+    dataKey?: string | number | ((obj: any) => any);
     color?: string;
   }>;
   label?: React.ReactNode;
   labelFormatter?: (label: any, payload: any[]) => React.ReactNode;
   labelClassName?: string;
-  formatter?: (value: any, name: string, props: any, index: number, payload?: any) => React.ReactNode;
+  formatter?: (value: any, name: string, props: any, index: number) => React.ReactNode;
   color?: string;
   indicator?: "line" | "dot" | "dashed";
   hideLabel?: boolean;
   hideIndicator?: boolean;
   nameKey?: string;
   labelKey?: string;
-} & Omit<React.HTMLAttributes<HTMLDivElement>, 'label' | 'content'>;
+  className?: string;
+}
 
 const ChartTooltipContent = React.forwardRef<
   HTMLDivElement,
-  ChartTooltipContentProps
+  ChartTooltipContentProps & React.HTMLAttributes<HTMLDivElement>
 >(
   (
     {
@@ -474,7 +477,7 @@ const ChartTooltipContent = React.forwardRef<
                 )}
               >
                 {formatter && item?.value !== undefined && item.name ? (
-                  formatter(item.value, item.name, item, index, item.payload)
+                  formatter(item.value, item.name, item, index)
                 ) : (
                   <>
                     {itemConfig?.icon ? (
