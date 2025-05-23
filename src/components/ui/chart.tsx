@@ -137,10 +137,11 @@ export const Chart = React.forwardRef<
               <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
             )}
             {showLegend && (
+              // Fix 1: Use type assertion to match the expected type
               <RechartsPrimitive.Legend
                 verticalAlign="top"
                 height={36}
-                content={(props) => <ChartLegendContent {...props} />}
+                content={(props) => <ChartLegendContent {...props as ChartLegendContentProps} />}
               />
             )}
             {categories.map((category, index) => (
@@ -198,10 +199,11 @@ export const Chart = React.forwardRef<
               />
             )}
             {showLegend && (
+              // Fix 2: Use type assertion to match the expected type
               <RechartsPrimitive.Legend
                 verticalAlign="top"
                 height={36}
-                content={(props) => <ChartLegendContent {...props} />}
+                content={(props) => <ChartLegendContent {...props as ChartLegendContentProps} />}
               />
             )}
           </RechartsPrimitive.PieChart>
@@ -213,19 +215,19 @@ export const Chart = React.forwardRef<
 
 Chart.displayName = "Chart"
 
-// Fix for Error #1: Update the type definition to accept ReactNode instead of requiring ReactElement
+// Fix 3: Update the type definition to accept ReactNode instead of requiring ReactElement
 const ChartContainer = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> & {
     config: ChartConfig
-    children: React.ReactNode // Changed from ReactElement to ReactNode to accept arrays of elements
+    children: React.ReactNode
   }
->(({ id, className, children, config, ...props }, ref) => {
+>(({ id, className, children, ...props }, ref) => {
   const uniqueId = React.useId()
   const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`
 
   return (
-    <ChartContext.Provider value={{ config }}>
+    <ChartContext.Provider value={{ config: props.config }}>
       <div
         data-chart={chartId}
         ref={ref}
@@ -235,7 +237,7 @@ const ChartContainer = React.forwardRef<
         )}
         {...props}
       >
-        <ChartStyle id={chartId} config={config} />
+        <ChartStyle id={chartId} config={props.config} />
         <RechartsPrimitive.ResponsiveContainer>
           {children}
         </RechartsPrimitive.ResponsiveContainer>
@@ -243,7 +245,7 @@ const ChartContainer = React.forwardRef<
     </ChartContext.Provider>
   )
 })
-ChartContainer.displayName = "ChartContainer" // Fixed display name
+ChartContainer.displayName = "ChartContainer"
 
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(
@@ -280,14 +282,14 @@ ${colorConfig
 
 const ChartTooltip = RechartsPrimitive.Tooltip
 
-// Fix for Error #2 and #3: Create a custom interface for the ChartLegendContent that accepts the correct types
+// Fix for Error #1 and #2: Create a custom interface for the ChartLegendContent that accepts the correct types
 type ChartLegendContentProps = {
   payload?: Array<{
     value: string;
     type?: string;
     id?: string;
     color?: string;
-    dataKey?: string | number;
+    dataKey?: string | number | ((obj: any) => any); // Updated to accept function
     name?: string;
     payload?: any;
   }>;
@@ -365,7 +367,7 @@ type ChartTooltipContentProps = {
     name?: string;
     value?: any;
     payload?: any;
-    dataKey?: string;
+    dataKey?: string | number | ((obj: any) => any); // Updated to accept function
     color?: string;
   }>;
   label?: React.ReactNode;
