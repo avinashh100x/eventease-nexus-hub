@@ -105,9 +105,37 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSuccess }) => {
     
     setTimeout(() => {
       if (isEditMode && event) {
-        updateEvent(event.id, values);
+        // Ensure values has all required properties for Event type
+        const updatedEvent = {
+          name: values.name,
+          description: values.description,
+          category: values.category,
+          date: values.date,
+          time: values.time,
+          location: values.location,
+          organizerName: values.organizerName,
+          price: values.price,
+          image: values.image,
+          featured: values.featured || false,
+        };
+        
+        updateEvent(event.id, updatedEvent);
       } else {
-        addEvent(values);
+        // Ensure values has all required properties for Event type
+        const newEvent = {
+          name: values.name,
+          description: values.description,
+          category: values.category,
+          date: values.date,
+          time: values.time,
+          location: values.location,
+          organizerName: values.organizerName,
+          price: values.price,
+          image: values.image,
+          featured: values.featured || false,
+        };
+        
+        addEvent(newEvent);
       }
       setIsSubmitting(false);
       

@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 
@@ -31,6 +32,186 @@ function useChart() {
 
   return context
 }
+
+// Export the Chart component that was missing
+export const Chart = React.forwardRef<
+  HTMLDivElement,
+  React.ComponentProps<"div"> & {
+    type: "line" | "bar" | "area" | "pie" | "donut" | "scatter"
+    data: any[]
+    index: string
+    categories: string[]
+    colors?: string[]
+    valueFormatter?: (value: number) => string
+    yAxisWidth?: number
+    showAnimation?: boolean
+    showLegend?: boolean
+    showTooltip?: boolean
+    showXAxis?: boolean
+    showYAxis?: boolean
+    showGridLines?: boolean
+    className?: string
+  }
+>(
+  (
+    {
+      type,
+      data,
+      index,
+      categories,
+      colors = ["#3b82f6", "#6366f1", "#a855f7", "#ec4899", "#f43f5e"],
+      valueFormatter,
+      yAxisWidth = 40,
+      showAnimation = true,
+      showLegend = true,
+      showTooltip = true,
+      showXAxis = true,
+      showYAxis = true,
+      showGridLines = true,
+      className,
+      ...props
+    },
+    ref
+  ) => {
+    const config = React.useMemo(() => {
+      return categories.reduce<ChartConfig>((acc, category, i) => {
+        acc[category] = {
+          color: colors[i % colors.length],
+        }
+        return acc
+      }, {})
+    }, [categories, colors])
+
+    return (
+      <ChartContainer ref={ref} config={config} className={className} {...props}>
+        {type === "bar" && (
+          <RechartsPrimitive.BarChart data={data}>
+            {showXAxis && (
+              <RechartsPrimitive.XAxis
+                dataKey={index}
+                stroke="#888888"
+                fontSize={12}
+                tickLine={false}
+                axisLine={false}
+              />
+            )}
+            {showYAxis && (
+              <RechartsPrimitive.YAxis
+                width={yAxisWidth}
+                stroke="#888888"
+                fontSize={12}
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={(value) => (valueFormatter ? valueFormatter(value) : value)}
+              />
+            )}
+            {showTooltip && (
+              <RechartsPrimitive.Tooltip
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    return (
+                      <div className="rounded-lg border bg-background p-2 shadow-sm">
+                        <div className="grid grid-cols-2 gap-2">
+                          {payload.map((entry, index) => (
+                            <div key={`item-${index}`} className="flex flex-col">
+                              <span className="text-[0.70rem] uppercase text-muted-foreground">
+                                {entry.name}
+                              </span>
+                              <span className="font-bold text-muted-foreground">
+                                {valueFormatter
+                                  ? valueFormatter(entry.value as number)
+                                  : entry.value}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  }
+
+                  return null
+                }}
+              />
+            )}
+            {showGridLines && (
+              <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
+            )}
+            {showLegend && (
+              <RechartsPrimitive.Legend
+                verticalAlign="top"
+                height={36}
+                content={(props) => <ChartLegendContent {...props} />}
+              />
+            )}
+            {categories.map((category, index) => (
+              <RechartsPrimitive.Bar
+                key={index}
+                dataKey={category}
+                fill={colors[index % colors.length]}
+                radius={[4, 4, 0, 0]}
+                isAnimationActive={showAnimation}
+              />
+            ))}
+          </RechartsPrimitive.BarChart>
+        )}
+        {type === "pie" && (
+          <RechartsPrimitive.PieChart data={data}>
+            <RechartsPrimitive.Pie
+              dataKey="value"
+              nameKey={index}
+              cx="50%"
+              cy="50%"
+              outerRadius={80}
+              label
+              labelLine
+              isAnimationActive={showAnimation}
+            >
+              {data.map((_, index) => (
+                <RechartsPrimitive.Cell
+                  key={`cell-${index}`}
+                  fill={colors[index % colors.length]}
+                />
+              ))}
+            </RechartsPrimitive.Pie>
+            {showTooltip && (
+              <RechartsPrimitive.Tooltip
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    return (
+                      <div className="rounded-lg border bg-background p-2 shadow-sm">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[0.70rem] uppercase text-muted-foreground">
+                            {payload[0]?.name}
+                          </span>
+                          <span className="font-bold text-muted-foreground">
+                            {valueFormatter
+                              ? valueFormatter(payload[0]?.value as number)
+                              : payload[0]?.value}
+                          </span>
+                        </div>
+                      </div>
+                    )
+                  }
+
+                  return null
+                }}
+              />
+            )}
+            {showLegend && (
+              <RechartsPrimitive.Legend
+                verticalAlign="top"
+                height={36}
+                content={(props) => <ChartLegendContent {...props} />}
+              />
+            )}
+          </RechartsPrimitive.PieChart>
+        )}
+      </ChartContainer>
+    )
+  }
+)
+
+Chart.displayName = "Chart"
 
 const ChartContainer = React.forwardRef<
   HTMLDivElement,
@@ -361,3 +542,4 @@ export {
   ChartLegendContent,
   ChartStyle,
 }
+
