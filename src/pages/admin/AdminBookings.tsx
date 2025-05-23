@@ -154,7 +154,7 @@ const AdminBookings: React.FC = () => {
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All statuses</SelectItem>
+                  <SelectItem value="all">All statuses</SelectItem>
                   <SelectItem value="confirmed">Confirmed</SelectItem>
                   <SelectItem value="upcoming">Upcoming</SelectItem>
                   <SelectItem value="attended">Attended</SelectItem>
