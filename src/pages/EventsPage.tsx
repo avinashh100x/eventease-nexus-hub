@@ -21,7 +21,7 @@ const EventsPage: React.FC = () => {
     let result = [...events];
 
     // Apply category filter
-    if (category) {
+    if (category && category !== "all") {
       result = result.filter((event) => event.category === category);
     }
 

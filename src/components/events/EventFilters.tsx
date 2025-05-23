@@ -55,7 +55,7 @@ const EventFilters: React.FC = () => {
     const newParams = new URLSearchParams();
 
     // Add non-empty values to the URL
-    if (values.category) newParams.set("category", values.category);
+    if (values.category && values.category !== "all") newParams.set("category", values.category);
     if (values.search) newParams.set("search", values.search);
     if (values.sortBy) newParams.set("sortBy", values.sortBy);
 
@@ -106,7 +106,7 @@ const EventFilters: React.FC = () => {
                 <FormLabel>Category</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  defaultValue={field.value || "all"}
                   disabled={isLoading}
                 >
                   <FormControl>
@@ -115,7 +115,7 @@ const EventFilters: React.FC = () => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="">All categories</SelectItem>
+                    <SelectItem value="all">All categories</SelectItem>
                     <SelectItem value="music">Music</SelectItem>
                     <SelectItem value="tech">Tech</SelectItem>
                     <SelectItem value="workshop">Workshop</SelectItem>
@@ -138,7 +138,7 @@ const EventFilters: React.FC = () => {
                 <FormLabel>Sort By</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  defaultValue={field.value || "default"}
                   disabled={isLoading}
                 >
                   <FormControl>
@@ -147,7 +147,7 @@ const EventFilters: React.FC = () => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="">Default</SelectItem>
+                    <SelectItem value="default">Default</SelectItem>
                     <SelectItem value="date-asc">Date (Earliest First)</SelectItem>
                     <SelectItem value="date-desc">Date (Latest First)</SelectItem>
                     <SelectItem value="price-asc">Price (Low to High)</SelectItem>
